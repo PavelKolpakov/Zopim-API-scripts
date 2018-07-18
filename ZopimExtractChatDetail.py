@@ -8,8 +8,8 @@ from datetime import timedelta
 from time import sleep
 
 config = {
-  'username': 'You Zopim Login',
-  'password': 'Your Zopim Password (better use API token)',
+  'username': 'Your Zopim EMAIL HERE',
+  'password': 'Your Zopim PASSWORD HERE',
   'base_path': 'https://www.zopim.com/api/v2'
 }
 
@@ -33,11 +33,8 @@ def _grouper(n, iterable, fillvalue=None):
     args = [iter(iterable)] * n
     return zip_longest(fillvalue=fillvalue, *args)
 
-#Since you want a report by month, lets just create a function to get all the chat IDs for a two digit month and 4 digit year
-
-def get_chat_ids_for_period(user_date, user_date1, length):
- all_chat_ids = []
- my_list = []
+def get_chat_ids_for_period(user_date, user_date1, length, self):
+ all_chat_ids = self
  i=0
  while i < length+1:
    search_query = "timestamp:[{0} TO {1}]".format((user_date+timedelta(days=i)).strftime('%Y-%m-%dT00:00'), (user_date1+timedelta(days=i)).strftime('%Y-%m-%dT%H:%M:%S'))
@@ -62,15 +59,11 @@ def get_chat_ids_for_period(user_date, user_date1, length):
        else:
          print("A request failed in the loop")
 
-         get_chat_ids_for_period(user_date, datetime.strptime(chat['timestamp'], '%Y-%m-%dT%H:%M:%SZ'), length) #str()
-         print(r)
+         get_chat_ids_for_period(user_date, datetime.strptime(chat['timestamp'], '%Y-%m-%dT%H:%M:%SZ'), length, all_chat_ids)
+         #print(r)
          break
-   my_list.append (all_chat_ids)
    i=i+1
-# my_listn = ''.join(str(my_list) )
-# print(my_listn)
- print(chat['timestamp'])
- return all_chat_ids #my_listn
+ return all_chat_ids
 
 def build_csv_data(queried_id_list):
   all_chats_for_csv = []
@@ -94,7 +87,8 @@ def build_csv_data(queried_id_list):
   return all_chats_for_csv
 
 #grab the ids for the specified range NOTE!! This is where you can change the year/month for the date range.
-queried_id_list = get_chat_ids_for_period(user_date , user_date1, length)
+queried_id_list = get_chat_ids_for_period(user_date , user_date1, length,[])
+#print(queried_id_list)
 
 #turn those into raw objects
 csv_obj_data = build_csv_data(queried_id_list)
